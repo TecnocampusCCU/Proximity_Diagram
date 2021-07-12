@@ -1,0 +1,5 @@
+<RCC>
+    <qresource prefix="/plugins/Proximity_Diagram" >
+        <file>icon.png</file>
+    </qresource>
+</RCC>
