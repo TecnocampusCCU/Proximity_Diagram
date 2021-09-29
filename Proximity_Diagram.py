@@ -66,7 +66,7 @@ from .resources import *
 from .Proximity_Diagram_dialog import Proximity_DiagramDialog
 import os.path
 
-Versio_modul="V_Q3.210712"
+Versio_modul="V_Q3.210929"
 
 class Proximity_Diagram:
     """QGIS Plugin Implementation."""
@@ -513,7 +513,7 @@ class Proximity_Diagram:
             'INPUT': result,
             'FIELD_NAME': 'UNIC',
             'FIELD_TYPE': 2,
-            'FIELD_LENGTH': 100000,
+            'FIELD_LENGTH': 99,
             'FIELD_PRECISION': 4,
             'FORMULA': ' uuid() ',
             'OUTPUT': 'memory:'
@@ -528,7 +528,7 @@ class Proximity_Diagram:
             'INPUT': field_calculator_out['OUTPUT'],
             'FIELD_NAME': 'Xc',
             'FIELD_TYPE': 0,
-            'FIELD_LENGTH': 100000,
+            'FIELD_LENGTH': 99,
             'FIELD_PRECISION': 4,
             'FORMULA': ' x( centroid( $geometry))',
             'OUTPUT': 'memory:'
@@ -543,7 +543,7 @@ class Proximity_Diagram:
             'INPUT': field_calculator_1_out['OUTPUT'],
             'FIELD_NAME': 'Yc',
             'FIELD_TYPE': 0,
-            'FIELD_LENGTH': 100000,
+            'FIELD_LENGTH': 99,
             'FIELD_PRECISION': 4,
             'FORMULA': ' y( centroid( $geometry))',
             'OUTPUT': 'memory:'
@@ -564,7 +564,7 @@ class Proximity_Diagram:
             'PREFIX': '',
             'OUTPUT': 'memory:'
         }
-        join_attributes_by_location_out = processing.run('native:joinattributesbylocation', parameters, feedback=f)
+        join_attributes_by_location_out = processing.run('qgis:joinattributesbylocation', parameters, feedback=f)
 
         # QgsProject.instance().addMapLayer(join_attributes_by_location_out['OUTPUT'])
 
@@ -574,7 +574,7 @@ class Proximity_Diagram:
             'INPUT': join_attributes_by_location_out['OUTPUT'],
             'FIELD_NAME': 'DIST',
             'FIELD_TYPE': 0,
-            'FIELD_LENGTH': 100000,
+            'FIELD_LENGTH': 99,
             'FIELD_PRECISION': 4,
             'FORMULA': 'sqrt(( ycoord - Yc ) ^ 2 + ( xcoord - Xc ) ^ 2)',
             'OUTPUT': 'memory:'
@@ -589,7 +589,7 @@ class Proximity_Diagram:
             'INPUT': field_calculator_3_out['OUTPUT'],
             'FIELD_NAME': 'dst',
             'FIELD_TYPE': 0,
-            'FIELD_LENGTH': 100000,
+            'FIELD_LENGTH': 99,
             'FIELD_PRECISION': 4,
             'FORMULA': 'minimum( DIST,group_by:="UNIC" )',
             'OUTPUT': 'memory:'
