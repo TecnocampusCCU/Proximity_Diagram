@@ -66,7 +66,7 @@ from .resources import *
 from .Proximity_Diagram_dialog import Proximity_DiagramDialog
 import os.path
 
-Versio_modul="V_Q3.210929"
+Versio_modul="V_Q3.211008"
 
 class Proximity_Diagram:
     """QGIS Plugin Implementation."""
@@ -267,18 +267,18 @@ class Proximity_Diagram:
     def controlErrors(self):
         """Aquesta funció controla que tots els camps siguin correctes abans de fer el càlcul"""
         errors = []
-        if self.dlg.comboConnexio.currentText() == 'Selecciona connexió' and self.dlg.tabWidget_Destino.currentIndex() == 0:
-            errors.append('No hi ha seleccionada cap connexió')
+        if self.dlg.comboConnexio.currentText() == 'Choose connection' and self.dlg.tabWidget_Destino.currentIndex() == 0:
+            errors.append('Connection not selected')
         if self.dlg.tabWidget_Destino.currentIndex() == 0:
-            if self.dlg.combo_punts.currentText() == 'Selecciona una entitat' or self.dlg.combo_punts.currentText() == '':
-                errors.append('No hi ha cap capa de entitats seleccionada')
-            if self.dlg.combo_polygons.currentText() == 'Selecciona una entitat' or self.dlg.combo_polygons.currentText() == '':
-                errors.append('No hi ha cap capa de polígons seleccionada')
+            if self.dlg.combo_punts.currentText() == 'Choose an entity' or self.dlg.combo_punts.currentText() == '':
+                errors.append('Entitiy not selected')
+            if self.dlg.combo_polygons.currentText() == 'Choose an entity' or self.dlg.combo_polygons.currentText() == '':
+                errors.append('Polygon layer not selected')
         else:
-            if self.dlg.combo_punts_2.currentText() == 'Selecciona una entitat' or self.dlg.combo_punts_2.currentText() == '':
-                errors.append('No hi ha cap capa de entitats seleccionada')
-            if self.dlg.combo_polygons_2.currentText() == 'Selecciona una entitat' or self.dlg.combo_polygons_2.currentText() == '':
-                errors.append('No hi ha cap capa de polígons seleccionada')
+            if self.dlg.combo_punts_2.currentText() == 'Choose an entity' or self.dlg.combo_punts_2.currentText() == '':
+                errors.append('Entity layer not selected')
+            if self.dlg.combo_polygons_2.currentText() == 'Choose an entity' or self.dlg.combo_polygons_2.currentText() == '':
+                errors.append('Polygon layer not selected')
 
         '''try:
             numero = int(float(self.dlg.txt_iteracions.text()))
@@ -419,10 +419,10 @@ class Proximity_Diagram:
                     elif layer.wkbType() == QgsWkbTypes.Polygon or layer.wkbType() == QgsWkbTypes.MultiPolygon:
                         polygons.append(layer.name())
 
-            self.ompleCombos(self.dlg.combo_punts_2, punts, 'Selecciona una entitat', True)
-            self.ompleCombos(self.dlg.combo_polygons_2, polygons, 'Selecciona una entitat', True)
+            self.ompleCombos(self.dlg.combo_punts_2, punts, 'Choose an entity', True)
+            self.ompleCombos(self.dlg.combo_polygons_2, polygons, 'Choose an entity', True)
         except Exception as ex:
-            missatge = "Error al afegir els elements de la llegenda"
+            missatge = "Error adding legend elements"
             print(missatge)
             template = "An exception of type {0} occurred. Arguments:\n{1!r}"
             message = template.format(type(ex).__name__, ex.args)
@@ -443,7 +443,7 @@ class Proximity_Diagram:
 
         errors = self.controlErrors()
         if len(errors) > 0:
-            llista = "Llista d'errors:\n\n"
+            llista = "Error list:\n\n"
             for i in range(0, len(errors)):
                 llista += ("- " + errors[i] + '\n')
 
@@ -467,10 +467,17 @@ class Proximity_Diagram:
         else:
             result = self.loadLayerFromLegend(self.dlg.combo_punts_2.currentText())
 
+        # Transform geometry from multipart to monopart
+        parameters = {
+            'INPUT': result,
+            'OUTPUT': 'memory:'
+        }
+        geometry_mono = processing.run('native:multiparttosingleparts', parameters, feedback=f)
+        
         # Add geometry attributes to IES
 
         parameters = {
-            'INPUT': result,
+            'INPUT': geometry_mono['OUTPUT'],
             'CALC_METHOD': 0,
             'OUTPUT': 'memory:'
         }
@@ -658,15 +665,15 @@ class Proximity_Diagram:
             myRangeList = []
             mysymbol = QgsFillSymbol()
 
-            if (self.dlg.ColorDegradat.currentText() == 'Gris'):
+            if (self.dlg.ColorDegradat.currentText() == 'Gray'):
                 colorRamp = QgsGradientColorRamp(QColor(255, 255, 255), QColor(0, 0, 0))
-            elif (self.dlg.ColorDegradat.currentText() == 'Vermell'):
+            elif (self.dlg.ColorDegradat.currentText() == 'Red'):
                 colorRamp = QgsGradientColorRamp(QColor(255, 255, 255), QColor(255, 0, 0))
-            elif (self.dlg.ColorDegradat.currentText() == 'Groc'):
+            elif (self.dlg.ColorDegradat.currentText() == 'Yellow'):
                 colorRamp = QgsGradientColorRamp(QColor(255, 255, 255), QColor(255, 255, 0))
-            elif (self.dlg.ColorDegradat.currentText() == 'Blau'):
+            elif (self.dlg.ColorDegradat.currentText() == 'Blue'):
                 colorRamp = QgsGradientColorRamp(QColor(255, 255, 255), QColor(0, 0, 255))
-            elif (self.dlg.ColorDegradat.currentText() == 'Verd'):
+            elif (self.dlg.ColorDegradat.currentText() == 'Green'):
                 colorRamp = QgsGradientColorRamp(QColor(255, 255, 255), QColor(0, 255, 0))
 
             format = QgsRendererRangeLabelFormat()
@@ -786,7 +793,7 @@ class Proximity_Diagram:
             schema = 'public'
 
             self.dlg.lblEstatConn.setStyleSheet('border:1px solid #000000; background-color: #ffff7f')
-            self.dlg.lblEstatConn.setText('Connectant...')
+            self.dlg.lblEstatConn.setText('Connecting...')
             self.dlg.lblEstatConn.setAutoFillBackground(True)
             QApplication.processEvents()
 
@@ -808,23 +815,23 @@ class Proximity_Diagram:
                 cur.execute(sql)
                 llista = cur.fetchall()
                 print("3")
-                self.ompleCombos(self.dlg.combo_punts, llista, 'Selecciona una entitat', True)
+                self.ompleCombos(self.dlg.combo_punts, llista, 'Choose an entity', True)
 
                 sql = "select f_table_name from geometry_columns where (type = 'MULTIPOLYGON' or type = 'POLYGON') and f_table_schema ='public' order by 1"
                 cur.execute(sql)
                 llista = cur.fetchall()
                 print("3")
-                self.ompleCombos(self.dlg.combo_polygons, llista, 'Selecciona una entitat', True)
+                self.ompleCombos(self.dlg.combo_polygons, llista, 'Choose an entity', True)
             except Exception as ex:
                 self.dlg.setEnabled(True)
-                print("Error a la connexio")
+                print("Error connecting")
                 template = "An exception of type {0} occurred. Arguments:\n{1!r}"
                 message = template.format(type(ex).__name__, ex.args)
                 print(message)
                 self.barraEstat_Error()
-                QMessageBox.information(None, "Error", "Error a la connexio")
+                QMessageBox.information(None, "Error", "Error connecting")
                 self.dlg.lblEstatConn.setStyleSheet('border:1px solid #000000; background-color: #ff7f7f')
-                self.dlg.lblEstatConn.setText('Error: Hi ha algun camp erroni.')
+                self.dlg.lblEstatConn.setText('Error: There''s an invalid field.')
                 print("I am unable to connect to the database")
 
                 return
@@ -871,15 +878,15 @@ class Proximity_Diagram:
 
     def barraEstat_llegint(self):
         self.dlg.lblEstatConn.setStyleSheet('border:1px solid #000000; background-color: rgb(255, 170, 142)')
-        self.dlg.lblEstatConn.setText("Llegint...")
+        self.dlg.lblEstatConn.setText("Reading...")
 
     def barraEstat_processant(self):
         self.dlg.lblEstatConn.setStyleSheet('border:1px solid #000000; background-color: rgb(255, 125, 155)')
-        self.dlg.lblEstatConn.setText("Processant...")
+        self.dlg.lblEstatConn.setText("Processing...")
 
     def barraEstat_noConnectat(self):
         self.dlg.lblEstatConn.setStyleSheet('border:1px solid #000000; background-color: #FFFFFF')
-        self.dlg.lblEstatConn.setText('No connectat')
+        self.dlg.lblEstatConn.setText('Not connected')
 
     def barraEstat_Error(self):
         self.dlg.lblEstatConn.setStyleSheet('border:1px solid #000000; background-color: #FF0000')
@@ -887,7 +894,7 @@ class Proximity_Diagram:
 
     def barraEstat_connectat(self):
         self.dlg.lblEstatConn.setStyleSheet('border:1px solid #000000; background-color: #7fff7f')
-        self.dlg.lblEstatConn.setText('Connectat')
+        self.dlg.lblEstatConn.setText('Connected')
 
     def run(self):
         """Run method that performs all the real work"""
@@ -900,7 +907,7 @@ class Proximity_Diagram:
         conn = self.getConnections()
         # Run the dialog event loop
         # Run the dialog event loop
-        self.populateComboBox(self.dlg.comboConnexio, conn, 'Selecciona connexió', True)
+        self.populateComboBox(self.dlg.comboConnexio, conn, 'Choose connection', True)
         # Run the dialog event loop
         result = self.dlg.exec_()
         # See if OK was pressed
@@ -915,17 +922,17 @@ class Proximity_Diagram:
                 if (os.path.exists(path + "/tr_illes.csv")):
                     return True
                 else:
-                    QMessageBox.information(None, "ERROR 0: LECTURA DE LES ILLES", "No s'ha trobat l'arxiu de les illes.")
+                    QMessageBox.information(None, "ERROR 0: READING ILLES", "ILLES file not found.")
                     return False
             elif (self.dlg.bt_Parcel.isChecked()):
                 if (os.path.exists(path + "/tr_parceles.csv") and os.path.exists(path + "/tr_illes.csv")):
                     return True
                 else:
-                    QMessageBox.information(None, "ERROR 1: LECTURA DE LES PARCEL·LES", "No s'han trobat els arxius de illes ni parcel·les.")
+                    QMessageBox.information(None, "ERROR 1: READING PARCELES", "ILLES and PARCELES files not found.")
                     return False
             else:
                 if (os.path.exists(path + "/tr_npolicia.csv") and os.path.exists(path + "/tr_illes.csv")):
                     return True
                 else:
-                    QMessageBox.information(None, "ERROR 2: LECTURA DELS NÚMEROS DE POLICIA", "No s'han trobat els arxius de illes ni nÃºmeros de policia.")
+                    QMessageBox.information(None, "ERROR 2: READING NUMEROS DE POLICIA", "NUMEROS DE POLICIA file not found.")
                     return False

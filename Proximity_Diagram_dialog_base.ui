@@ -61,7 +61,7 @@
     <string notr="true">background-color: rgb(255, 156, 156);</string>
    </property>
    <property name="text">
-    <string>SORTIR</string>
+    <string>EXIT</string>
    </property>
   </widget>
   <widget class="QComboBox" name="ColorDegradat">
@@ -78,27 +78,27 @@
    </property>
    <item>
     <property name="text">
-     <string>Gris</string>
+     <string>Gray</string>
     </property>
    </item>
    <item>
     <property name="text">
-     <string>Vermell</string>
+     <string>Red</string>
     </property>
    </item>
    <item>
     <property name="text">
-     <string>Groc</string>
+     <string>Yellow</string>
     </property>
    </item>
    <item>
     <property name="text">
-     <string>Blau</string>
+     <string>Blue</string>
     </property>
    </item>
    <item>
     <property name="text">
-     <string>Verd</string>
+     <string>Green</string>
     </property>
    </item>
   </widget>
@@ -600,7 +600,7 @@
     <string notr="true">background-color: rgb(85, 255, 127);</string>
    </property>
    <property name="text">
-    <string>INICI</string>
+    <string>START</string>
    </property>
   </widget>
   <widget class="QLabel" name="label">
@@ -863,7 +863,7 @@
       <string>Recarregar elements de llegenda</string>
      </property>
      <property name="text">
-      <string>Actualitza</string>
+      <string>Refresh</string>
      </property>
     </widget>
     <widget class="QLabel" name="label_5">
