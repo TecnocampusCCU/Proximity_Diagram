@@ -384,6 +384,7 @@ class Proximity_Diagram:
         self.dlg.combo_punts_2.clear()
         self.dlg.combo_polygons.clear()
         self.dlg.combo_polygons_2.clear()
+        self.dlg.drop_fields.setVisible(False)
 
         self.dlg.setEnabled(True)
         if (os.name == 'nt'):
