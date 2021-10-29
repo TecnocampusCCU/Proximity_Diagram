@@ -66,7 +66,7 @@ from .resources import *
 from .Proximity_Diagram_dialog import Proximity_DiagramDialog
 import os.path
 
-Versio_modul="V_Q3.211008"
+Versio_modul="V_Q3.211029"
 
 class Proximity_Diagram:
     """QGIS Plugin Implementation."""
@@ -723,6 +723,12 @@ class Proximity_Diagram:
             root.insertChildNode(0, myLayerNode)
             myLayerNode.setCustomProperty("showFeatureCount", True)
             iface.mapCanvas().refresh()
+
+            for layer in QgsProject.instance().mapLayers().values():
+                if layer.id() == vlayer.id():
+                    layer.setName("Distant ranges in meters")
+                    break
+
         else:
             print("Error vector layer")
         QApplication.processEvents()
