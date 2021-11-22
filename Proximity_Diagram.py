@@ -66,7 +66,7 @@ from .resources import *
 from .Proximity_Diagram_dialog import Proximity_DiagramDialog
 import os.path
 
-Versio_modul="V_Q3.211111"
+Versio_modul="V_Q3.211122"
 
 class Proximity_Diagram:
     """QGIS Plugin Implementation."""
@@ -733,7 +733,7 @@ class Proximity_Diagram:
 
             for layer in QgsProject.instance().mapLayers().values():
                 if layer.id() == vlayer.id():
-                    layer.setName("Distant ranges in meters")
+                    layer.setName("Distance ranges in meters")
                     break
 
         else:
