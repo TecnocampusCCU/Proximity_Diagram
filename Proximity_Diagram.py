@@ -66,7 +66,7 @@ from .resources import *
 from .Proximity_Diagram_dialog import Proximity_DiagramDialog
 import os.path
 
-Versio_modul="V_Q3.211029"
+Versio_modul="V_Q3.211111"
 
 class Proximity_Diagram:
     """QGIS Plugin Implementation."""
@@ -484,7 +484,7 @@ class Proximity_Diagram:
         }
         geometry_attributes_out = processing.run('qgis:exportaddgeometrycolumns', parameters, feedback=f)
 
-        # QgsProject.instance().addMapLayer(geometry_attributes_out['OUTPUT'])
+        #QgsProject.instance().addMapLayer(geometry_mono['OUTPUT'])
 
         # Buffer, we use the output from 'Add geometry attributes'
 
@@ -515,10 +515,17 @@ class Proximity_Diagram:
         else:
             result = self.loadLayerFromLegend(self.dlg.combo_polygons_2.currentText())
 
+        # Transform geometry from multipart to monopart
+        parameters = {
+            'INPUT': result,
+            'OUTPUT': 'memory:'
+        }
+        geometry_mono = processing.run('native:multiparttosingleparts', parameters, feedback=f)
+
         # Field calculator for ILLES/IES
 
         parameters = {
-            'INPUT': result,
+            'INPUT': geometry_mono['OUTPUT'],
             'FIELD_NAME': 'UNIC',
             'FIELD_TYPE': 2,
             'FIELD_LENGTH': 99,
