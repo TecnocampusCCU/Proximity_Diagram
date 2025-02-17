@@ -25,29 +25,14 @@ from qgis.PyQt.QtCore import QSettings, QTranslator, QCoreApplication
 from qgis.PyQt.QtGui import QIcon
 from qgis.PyQt.QtWidgets import QAction
 from qgis.core import QgsProject
-from qgis.core import QgsProcessing
 from qgis.core import QgsMapLayer,QgsWkbTypes
-from qgis.core import QgsProcessingParameters
-from qgis.core import QgsProcessingException
-from qgis.core import QgsProcessingParameterBoolean
-from qgis.core import QgsProcessingParameterDistance
-from qgis.core import QgsProcessingParameterEnum
-from qgis.core import QgsProcessingParameterPoint
-from qgis.core import QgsProcessingParameterField
-from qgis.core import QgsProcessingParameterNumber
-from qgis.core import QgsProcessingParameterString
-from qgis.core import QgsProcessingParameterFeatureSource
-from qgis.core import QgsProcessingParameterFeatureSink
-from qgis.core import QgsProcessingParameterDefinition
-from qgis.core import QgsProcessingAlgorithm
+from qgis.core import QgsClassificationQuantile
 from qgis.gui import QgsMessageBar
-from PyQt5.QtWidgets import QAction,QMessageBox,QTableWidgetItem, QApplication,QSizePolicy,QGridLayout,QDialogButtonBox,QFileDialog,QProgressBar,QColorDialog,QToolBar
-import processing
-from processing.tools import dataobjects
-from processing.algs.qgis.QgisAlgorithm import QgisAlgorithm
-from qgis.core import QgsProcessingFeedback, Qgis, QgsProcessingMultiStepFeedback
+from PyQt5.QtWidgets import QAction,QMessageBox,QApplication,QSizePolicy,QGridLayout,QDialogButtonBox,QColorDialog,QToolBar
+import processing # type: ignore
+from qgis.core import QgsProcessingFeedback, QgsProcessingMultiStepFeedback
 from PyQt5.QtGui import *
-from PyQt5.QtWidgets import QAction, QMessageBox, QTableWidgetItem, QApplication, QToolBar, QColorDialog, QFileDialog
+from PyQt5.QtWidgets import QAction, QMessageBox, QApplication, QToolBar, QColorDialog
 from qgis.core import QgsFillSymbol
 from qgis.core import QgsRenderContext
 from qgis.core import QgsGradientColorRamp
@@ -55,8 +40,6 @@ from qgis.core import QgsRendererRangeLabelFormat
 from qgis.core import QgsGraduatedSymbolRenderer
 from qgis.core import QgsLayerTreeLayer
 from qgis.utils import iface
-from qgis.core import QgsPalLayerSettings
-from qgis.core import QgsTextFormat
 import psycopg2
 
 
@@ -66,7 +49,7 @@ from .resources import *
 from .Proximity_Diagram_dialog import Proximity_DiagramDialog
 import os.path
 
-Versio_modul="V_Q3.211122"
+Versio_modul="V_Q3.250217"
 
 class Proximity_Diagram:
     """QGIS Plugin Implementation."""
@@ -324,7 +307,7 @@ class Proximity_Diagram:
         predefInList = None
         for elem in list:
             try:
-                item = QStandardItem(unicode(elem))
+                item = QStandardItem(str(elem))
             except TypeError:
                 item = QStandardItem(str(elem))
             model.appendRow(item)
@@ -350,7 +333,7 @@ class Proximity_Diagram:
         for elem in llista:
             try:
                 if isinstance(elem, tuple):
-                    item = QStandardItem(unicode(elem[0]))
+                    item = QStandardItem(str(elem[0]))
                 else:
                     item = QStandardItem(str(elem))
             except TypeError:
@@ -688,37 +671,17 @@ class Proximity_Diagram:
 
             precision = 3
 
-            format.setFormat(template)
-            format.setPrecision(precision)
-            format.setTrimTrailingZeroes(False)
-            '''
-            if (self.dlg.combo_Tipus.currentText() == 'Quantil'):
-                renderer = QgsGraduatedSymbolRenderer.createRenderer(vlayer, fieldname, numberOfClasses,
-                                                                     QgsGraduatedSymbolRenderer.Quantile,
-                                                                     mysymbol, colorRamp)
-            elif (self.dlg.combo_Tipus.currentText() == 'Interval igual'):
-                renderer = QgsGraduatedSymbolRenderer.createRenderer(vlayer, fieldname, numberOfClasses,
-                                                                     QgsGraduatedSymbolRenderer.EqualInterval,
-                                                                     mysymbol, colorRamp)
-            elif (self.dlg.combo_Tipus.currentText() == 'Ruptures naturals'):
-                renderer = QgsGraduatedSymbolRenderer.createRenderer(vlayer, fieldname, numberOfClasses,
-                                                                     QgsGraduatedSymbolRenderer.Jenks, mysymbol,
-                                                                     colorRamp)
-            elif (self.dlg.combo_Tipus.currentText() == 'Desviació estandard'):
-                renderer = QgsGraduatedSymbolRenderer.createRenderer(vlayer, fieldname, numberOfClasses,
-                                                                     QgsGraduatedSymbolRenderer.StdDev,
-                                                                     mysymbol, colorRamp)
-            elif (self.dlg.combo_Tipus.currentText() == 'Pretty breaks'):
-                renderer = QgsGraduatedSymbolRenderer.createRenderer(vlayer, fieldname, numberOfClasses,
-                                                                     QgsGraduatedSymbolRenderer.Pretty,
-                                                                     mysymbol, colorRamp)
-
-            '''
-            renderer = QgsGraduatedSymbolRenderer.createRenderer(vlayer, fieldname, numberOfClasses,
-                                                                 QgsGraduatedSymbolRenderer.Quantile,
-                                                                 mysymbol, colorRamp)
-
-            renderer.setLabelFormat(format, True)
+            
+            renderer = QgsGraduatedSymbolRenderer()
+            renderer.setClassAttribute(fieldname)
+            renderer.setSourceSymbol(mysymbol)
+            renderer.setSourceColorRamp(colorRamp)
+            classification_method = QgsClassificationQuantile()
+            classification_method.setLabelFormat(template)
+            classification_method.setLabelPrecision(precision)
+            classification_method.setLabelTrimTrailingZeroes(False)
+            renderer.setClassificationMethod(classification_method)
+            renderer.updateClasses(vlayer, numberOfClasses)
             # vlayer.setOpacity(self.dlg.Transparencia.value() / 100)
             vlayer.setRenderer(renderer)
             QApplication.processEvents()
